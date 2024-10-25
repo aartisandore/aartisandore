@@ -127,9 +127,9 @@ class employeeClass:
         if self.var_emp_id.get() == "":
             messagebox.showerror("Error", "Employee ID must be required", parent=self.root)
         else:
-            cur.execute("SELECT * FROM employee where eid=?", (self.var_emp_id.get(),))
+            cur.execute("SELECT * from employee where eid=?", (self.var_emp_id.get(),))
             row = cur.fetchone()
-            if row==None:
+            if row!=None:
                 messagebox.showerror("Error", "This Employee ID already assigned, try different", parent=self.root)
             else:
                 cur.execute("INSERT INTO employee (eid, name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
@@ -138,8 +138,10 @@ class employeeClass:
                                         self.var_email.get(),
                                         self.var_gender.get(),
                                         self.var_contact.get(),
+
                                         self.var_dob.get(),
                                         self.var_doj.get(),
+
                                         self.var_password.get(),
                                         self.var_utype.get(),
                                         self.txt_address.get(1.0, END),
@@ -169,7 +171,7 @@ class employeeClass:
     def get_data(self,ev):
        f=self.EmployeeTable.focus()
        content=(self.EmployeeTable.item(f))
-       row=content['values']
+       row=content ['values']
        # print(row)
        self.var_emp_id.set(row[0])
        self.var_name.set(row[1])
