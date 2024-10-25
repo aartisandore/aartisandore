@@ -77,8 +77,8 @@ class employeeClass:
       #===buttons====
         btn_add=Button(self.root,text="Save",command=self.add,font=("goudy oldsd style",15),bg="#2196f3",fg="white",cursor="hand2").place(x=500,y=305,width=110,height=28)
         btn_update=Button(self.root,text="Update",command=self.Update,font=("goudy oldsd style",15),bg="#4caf50",fg="white",cursor="hand2").place(x=620,y=305,width=110,height=28)
-        btn_delete=Button(self.root,text="Delete",font=("goudy oldsd style",15),bg="#f44336",fg="white",cursor="hand2").place(x=740,y=305,width=110,height=28)
-        btn_clear=Button(self.root,text="Clear",font=("goudy oldsd style",15),bg="#607d8b",fg="white",cursor="hand2").place(x=860,y=305,width=110,height=28)
+        btn_delete=Button(self.root,text="Delete",command=self.delete,font=("goudy oldsd style",15),bg="#f44336",fg="white",cursor="hand2").place(x=740,y=305,width=110,height=28)
+        btn_clear=Button(self.root,text="Clear",command=self.clear,font=("goudy oldsd style",15),bg="#607d8b",fg="white",cursor="hand2").place(x=860,y=305,width=110,height=28)
      #====Employee Details===
         emp_frame=Frame(self.root,bd=3,relief=RIDGE)
         emp_frame.place(x=0,y=350,relwidth=1,height=150)
@@ -216,11 +216,40 @@ class employeeClass:
        except Exception as ex:
         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)   
    
-
-
-
-
-
+    def delete(self):
+        con = sqlite3.connect(database=r'ims.db')
+        cur = con.cursor()
+        try:
+            if self.var_emp_id.get() == "":
+                messagebox.showerror("Error", "Employee ID must be required", parent=self.root)
+            else:
+              cur.execute("SELECT * FROM employee where eid=?", (self.var_emp_id.get(),))
+              row = cur.fetchone()
+            if row==None:
+                messagebox.showerror("Error", "Invalid Employee ID", parent=self.root)
+            else:
+                op=messagebox.askyesno("Confirm","Do you really want to delete?",parent=self.root)
+                if op==True:
+                  cur.execute("delete from employee where eid=?",(self.var_emp_id.get(),))
+                  con.commit()
+                messagebox.showinfo("Delete","Employee Deleted Successfully",parent=self.root)
+                self.clear()
+        except Exception as ex:
+               messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)   
+   
+    def clear(self):
+       self.var_emp_id.set("")
+       self.var_name.set("")
+       self.var_email.set("")
+       self.var_gender.set("Select")
+       self.var_contact.set("")
+       self.var_dob.set("")
+       self.var_doj.set("")
+       self.var_password.set("")
+       self.var_utype.set("Admin")
+       self.txt_address.delete(1.0, END),
+       self.var_salary.set("")
+       self.show()
 
 if __name__ == "__main__":
  root = Tk()
