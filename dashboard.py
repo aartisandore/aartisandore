@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk  # pip install pillow 
 from employee import employeeClass
 from supplier import supplierClass
+from category import categoryClass
 class IMS:
     def __init__(self, root):
         self.root = root
@@ -38,7 +39,7 @@ class IMS:
         btn_Supplier = Button(LeftMenu, text="Supplier",command=self.supplier, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
                               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2")
         btn_Supplier.pack(side=TOP, fill=X)
-        btn_category = Button(LeftMenu, text="Category", image=self.icon_side, compound=LEFT, padx=5, anchor="w",
+        btn_category = Button(LeftMenu, text="Category",command=self.category, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
                               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2")
         btn_category.pack(side=TOP, fill=X)
         btn_product = Button(LeftMenu, text="Product", image=self.icon_side, compound=LEFT, padx=5, anchor="w",
@@ -78,7 +79,9 @@ class IMS:
         self.new_win=Toplevel(self.root)
         self.new_obj=supplierClass(self.new_win)   
 
-
+    def category(self):
+        self.new_win=Toplevel(self.root)
+        self.new_obj=categoryClass(self.new_win)   
         
 root = Tk()
 obj = IMS(root)
