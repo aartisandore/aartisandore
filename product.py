@@ -25,10 +25,8 @@ class productClass:
         self.var_qty=StringVar()
         self.var_status=StringVar()
         
-
         product_Frame=Frame(self.root,bd=2,relief=RIDGE,bg="white")
         product_Frame.place(x=10,y=10,width=450,height=480)
-
         #===coloumn1
         title=Label(product_Frame,text=" Manage Product Details",font=("goudy old style",18),bg="#0f4d7d",fg="white").pack(side=TOP,fill=X)
   
@@ -38,28 +36,21 @@ class productClass:
         lbl_price=Label(product_Frame,text="Price",font=("goudy old style",18),bg="white").place(x=30,y=210)
         lbl_qty=Label(product_Frame,text="Quantity",font=("goudy old style",18),bg="white").place(x=30,y=260)
         lbl_status=Label(product_Frame,text="Status",font=("goudy old style",18),bg="white").place(x=30,y=310)
-
-
       
         #===coloumn2
         cmb_cat=ttk.Combobox(product_Frame,textvariable=self.var_cat,values=self.cat_list,state='readonly',justify=CENTER,font=("goudy old style",15))
         cmb_cat.place(x=150,y=60,width=200)
         cmb_cat.current(0)
-
         cmb_sup=ttk.Combobox(product_Frame,textvariable=self.var_sup,values=self.sup_list,state='readonly',justify=CENTER,font=("goudy old style",15))
         cmb_sup.place(x=150,y=110,width=200)
         cmb_sup.current(0)
-
         txt_name=Entry(product_Frame,textvariable=self.var_name,font=("goudy old style",15),bg='lightyellow').place(x=150,y=160,width=200)
         txt_price=Entry(product_Frame,textvariable=self.var_price,font=("goudy old style",15),bg='lightyellow').place(x=150,y=210,width=200)
         txt_qty=Entry(product_Frame,textvariable=self.var_qty,font=("goudy old style",15),bg='lightyellow').place(x=150,y=260,width=200)
        
-
         cmb_status=ttk.Combobox(product_Frame,textvariable=self.var_status,values=("Active","Inactive"),state='readonly',justify=CENTER,font=("goudy old style",15))
         cmb_status.place(x=150,y=310,width=200)
         cmb_status.current(0)
-
-
         #===buttons====
         btn_add=Button(product_Frame,text="Save",command=self.add,font=("goudy oldsd style",15),bg="#2196f3",fg="white",cursor="hand2").place(x=10,y=400,width=100,height=40)
         btn_update=Button(product_Frame,text="Update",command=self.Update,font=("goudy oldsd style",15),bg="#4caf50",fg="white",cursor="hand2").place(x=120,y=400,width=100,height=40)
@@ -75,10 +66,6 @@ class productClass:
         cmb_search.current(0)
         txt_search=Entry(SearchFrame,textvariable=self.var_searchtxt,font=("goudy oldsd style",15),bg="lightyellow").place(x=200,y=10)
         btn_search=Button(SearchFrame,text="Search",command=self.search,font=("goudy oldsd style",15),bg="#4caf50",fg="white",cursor="hand2").place(x=410,y=9,width=150,height=30)
-
-
-
-
         #===Product Details===
         p_frame=Frame(self.root,bd=3,relief=RIDGE)
         p_frame.place(x=480,y=100,width=600,height=390)
@@ -97,9 +84,7 @@ class productClass:
         self.product_table.heading("qty",text="Quantity")
         self.product_table.heading("status",text="Status")
         
-
         self.product_table["show"]="headings"
-
         self.product_table.column("pid",width=90)
         self.product_table.column("Category",width=100)
         self.product_table.column("Supplier",width=100)
@@ -110,10 +95,8 @@ class productClass:
        
         self.product_table.pack(fill=BOTH,expand=1)
         self.product_table.bind("<ButtonRelease-1>",self.get_data)
-
         self.show()
      
-
      #=========================================================================================  
     def fetch_cat_sup(self):
            self.cat_list.append("Empty")
@@ -139,8 +122,6 @@ class productClass:
         
            except Exception as ex:
              messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-
-
     def add(self):
        con = sqlite3.connect(database=r'ims.db')
        cur = con.cursor()
@@ -166,7 +147,6 @@ class productClass:
         self.show()
        except Exception as ex:
         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-
     def show(self):
          con = sqlite3.connect(database=r'ims.db')
          cur = con.cursor()
@@ -179,9 +159,6 @@ class productClass:
                
          except Exception as ex:
           messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-
-
-
     def get_data(self,ev):
        f=self.product_table.focus()
        content=(self.product_table.item(f))
@@ -255,7 +232,6 @@ class productClass:
          self.var_searchtxt.set("")
          self.var_Searchby.set("Select")
          self.show()
-
     def search(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()

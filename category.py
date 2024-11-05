@@ -3,6 +3,7 @@ from tkinter import *
 from PIL import Image, ImageTk  # pip install pillow
 from tkinter import ttk, messagebox, END
 
+
 class categoryClass:
     def __init__(self, root):
         self.root = root
@@ -13,8 +14,8 @@ class categoryClass:
         ### Variables ===
         self.var_cat_id = StringVar()
         self.var_name = StringVar()
-        
-        # =====Title============
+       
+        # =====title============
         lbl_title = Label(self.root, text="Manage Product Category", font=("gowdy old style", 30), bg="#184a45", fg="white", bd=3, relief=RIDGE)
         lbl_title.pack(side=TOP, fill=X, padx=10, pady=2)
         
@@ -113,6 +114,7 @@ class categoryClass:
             else:
                 cur.execute("SELECT * FROM category WHERE cid=?", (self.var_cat_id.get(),))
                 row = cur.fetchone()
+
                 if row is None:
                     messagebox.showerror("Error", "Error, please try again", parent=self.root)
                 else:
@@ -126,6 +128,10 @@ class categoryClass:
                         self.var_name.set("")
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
+
+ 
+    
 
 if __name__ == "__main__":
     root = Tk()                          

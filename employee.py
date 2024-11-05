@@ -190,6 +190,11 @@ class employeeClass:
     def Update(self):
        con = sqlite3.connect(database=r'ims.db')
        cur = con.cursor()
+       if row and len(row) > 0:
+        self.var_emp_id.set(row[0])
+       else:
+        print("Row is empty or doesn't have enough elements.")
+
        try:
         if self.var_emp_id.get() == "":
             messagebox.showerror("Error", "Employee ID must be required", parent=self.root)
@@ -256,26 +261,38 @@ class employeeClass:
        self.show()
 
     def search(self):
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
-        try: 
-           if self.var_Searchby.get()=="Select":
-              messagebox.showerror("Error","Select Search By Option",parent=self.root)
-           elif self.var_searchtxt.get()=="":
-              messagebox.showerror("Error","Search input should be required",parent=self.root) 
-        
-           else:
-              cur.execute("select * from employee where"+self.var_Searchby.get()+" LIKE '%"+self.var_searchtxt.get()+"%'")
-              rows=cur.fetchall()
-              if len(rows)!=0:
-                 self.EmployeeTable.delete(self.EmployeeTable.get_children())
-                 for row in rows:
-                    self.EmployeeTable.insert('',END,values=row)
-              else:
-                messagebox.showerror("Error","No record found!!!",parent=self.root)
-        except Exception as ex:
-               messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)   
-   
+     con = sqlite3.connect(database=r'ims.db')
+     cur = con.cursor()
+     try:
+        # Get the selected search option and the search text
+        search_by = self.var_Searchby.get()
+        search_txt = self.var_searchtxt.get()
+
+        # Input validation
+        if search_by == "Select":
+            messagebox.showerror("Error", "Please select a search option.", parent=self.root)
+        elif search_txt == "":
+            messagebox.showerror("Error", "Search input is required.", parent=self.root)
+        else:
+            # Using a parameterized query to avoid SQL injection
+            query = f"SELECT * FROM employee WHERE {search_by} LIKE ?"
+            cur.execute(query, ('%' + search_txt + '%',))  # Parameterized query
+            rows = cur.fetchall()
+
+            # Check if any records are returned
+            if rows:
+                self.EmployeeTable.delete(*self.EmployeeTable.get_children())  # Clear the table
+                for row in rows:
+                    self.EmployeeTable.insert('', 'end', values=row)  # Insert fetched records
+            else:
+                messagebox.showinfo("No Results", "No records found.", parent=self.root)
+
+     except sqlite3.Error as e:
+        messagebox.showerror("Database Error", f"Database error: {str(e)}", parent=self.root)
+     except Exception as ex:
+        messagebox.showerror("Error", f"An unexpected error occurred: {str(ex)}", parent=self.root)
+     finally:
+         con.close()  # Ensure the connection is closed
 
 
 

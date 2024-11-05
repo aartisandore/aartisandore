@@ -1,10 +1,14 @@
-from msilib import add_data
 from tkinter import *
 from PIL import Image, ImageTk  # pip install pillow 
 from tkinter import ttk,messagebox
 import tkinter as tk
 import sqlite3
 import time
+import os
+import tempfile
+
+
+
 class BillClass:
     def __init__(self, root):
         self.root = root
@@ -12,6 +16,7 @@ class BillClass:
         self.root.title("Inventory Management System | developed by Aarti")
         self.root.config(bg="white")
         self.cart_list=[]
+        self.chk_print=0
         # ===title====
         self.icon_title = PhotoImage(file="images/logo1.png")
         title = Label(self.root, text="Inventory Management System", image=self.icon_title, compound=LEFT,
@@ -178,7 +183,7 @@ class BillClass:
         self.lbl_instock=Label(Add_CartWidgetsFrame,text="In stock",font=("times new roman",15),bg="white")
         self.lbl_instock.place(x=5,y=70)
         
-        btn_clear_cart=Button(Add_CartWidgetsFrame,text="clear",font=("times new roman",15,"bold"),bg="lightgrey",cursor="hand2").place(x=180,y=70,width=150,height=30)
+        btn_clear_cart=Button(Add_CartWidgetsFrame,text="clear",command=self.clear_cart,font=("times new roman",15,"bold"),bg="lightgrey",cursor="hand2").place(x=180,y=70,width=150,height=30)
         btn_add_cart=Button(Add_CartWidgetsFrame,text="Add | Update Cart",command=self.add_update_cart,font=("times new roman",15,"bold"),bg="orange",cursor="hand2").place(x=340,y=70,width=180,height=30)
 
         #=================billing area=========
@@ -207,10 +212,10 @@ class BillClass:
         self.lbl_net_pay.place(x=246,y=5,width=160,height=70)
 
 
-        btn_print=Button(billMenuFrame,text='Print',cursor='hand2',font=("gowdy old style",15,"bold"),bg="lightgreen",fg="white")
+        btn_print=Button(billMenuFrame,text='Print',command=self.print_bill,cursor='hand2',font=("gowdy old style",15,"bold"),bg="lightgreen",fg="white")
         btn_print.place(x=2,y=80,width=120,height=50)
 
-        btn_clear_all=Button(billMenuFrame,text='Clear All',cursor='hand2',font=("gowdy old style",15,"bold"),bg="grey",fg="white")
+        btn_clear_all=Button(billMenuFrame,text='Clear All',command=self.clear_all,cursor='hand2',font=("gowdy old style",15,"bold"),bg="grey",fg="white")
         btn_clear_all.place(x=124,y=80,width=120,height=50)
 
         btn_generate=Button(billMenuFrame,text='Generate/SaveBill',command=self.generate_bill,cursor='hand2',font=("gowdy old style",12,"bold"),bg="#009688",fg="white")
@@ -289,44 +294,38 @@ class BillClass:
 
     def add_update_cart(self):
      if self.var_pid.get() == '':
-        messagebox.showerror('Error', "Please Select Product from the list", parent=self.root) 
-     elif self.var_qty.get() == '': 
-        messagebox.showerror('Error', "Quantity is Required", parent=self.root) 
-    
-     if int(self.var_qty.get()) > int(self.var_stock.get()):
-       print("Quantity requested exceeds available stock.")
-    # You might want to display a warning message or disable a button here.
-     else: 
-       # price_cal = int(self.var_qty.get()) * float(self.var_price.get())
-       #cart_data = [self.var_pid.get(), self.var_pname.get(), price_cal, self.var_qty.get()]
-      price_cal=self.var_price.get()
+        messagebox.showerror('Error', "Please select a product from the list", parent=self.root) 
+        return
+     elif self.var_qty.get() == '' or not self.var_qty.get().isdigit():
+        messagebox.showerror('Error', "Quantity is required and must be a number", parent=self.root)
+        return
 
-      present = 'no'
-      index_ = -1
+     quantity = int(self.var_qty.get())
+     if quantity > int(self.var_stock.get()):
+        messagebox.showerror('Error', "Requested quantity exceeds available stock", parent=self.root)
+        return
 
-        # Check if the product already exists in the cart
-      for i, row in enumerate(self.cart_list):
-            if self.var_pid.get() == row[0]:  # row[0] is the product ID
-                present = 'yes'
-                index_ = i
-                break
+     price_cal = quantity * float(self.var_price.get())
+     cart_data = [self.var_pid.get(), self.var_pname.get(), price_cal, quantity]
 
-            if present == 'yes':
-             op = messagebox.askyesno('Confirm', "Product already present.\nDo you want to Update | Remove from the Cart?", parent=self.root)
-            if op:
-                if self.var_qty.get() == "0":
-                    self.cart_list.pop(index_)
+     present = False
+     for i, row in enumerate(self.cart_list):
+        if self.var_pid.get() == row[0]:  # row[0] is the product ID
+            present = True
+            if messagebox.askyesno('Confirm', "Product already in cart. Update quantity?"):
+                if quantity == 0:
+                    self.cart_list.pop(i)
                 else:
-                    # Update quantity and price if product exists
-                    self.cart_list[index_][2] = price_cal  # Update price
-                    self.cart_list[index_][3] = self.var_qty.get()  # Update quantity
-            else:
-            # Append new product if it doesn't exist in the cart
-               self.cart_list.append(cart_data)
+                    row[2] = price_cal
+                    row[3] = quantity
+            break
 
-        # Refresh cart table display
-            self.show_cart()
-            self.bill_updates()
+     if not present:
+        self.cart_list.append(cart_data)
+
+     self.show_cart()
+     self.bill_updates()
+
 
     def bill_updates(self):
       self.bill_amt = 0
@@ -384,20 +383,31 @@ class BillClass:
      else:
         # ==== Bill Top ====
         self.bill_top()
+        self.update_date_time()
         # ==== Bill Middle ====
-        self.bill_middle()
+        self.bill_Middle()
         # ==== Bill Bottom ====
         self.bill_bottom()
-           
+
+        fp = open(f'bill/{str(self.invoice)}.txt', 'w')
+        fp.write(self.txt_bill_area.get('1.0',END))
+        fp.close()
+        messagebox.showinfo('Saved',"Bill has been generated/save in Backend",parent=self.root)
+        self.chk_print=1
+
+
+
+
+
     def bill_top(self):
-     invoice = str(time.strftime("%H%M%S")) + str(time.strftime("%d%m%y"))
+     self.invoice = str(time.strftime("%H%M%S")) + str(time.strftime("%d%m%y"))
      bill_top_temp = f'''
 \t\tXYZ-Inventory
-\tPhone No. 98725*****, Delhi-123450
+\tPhone No. 98725*****, Pune-411057
 {str("=" * 47)}
 Customer Name: {self.var_cname.get()}
  Ph no.: {self.var_contact.get()}
- Bill No. {invoice} \t\tDate: {time.strftime('%d/%m/%Y')}
+ Bill No. {self.invoice} \t\tDate: {time.strftime('%d/%m/%Y')}
  {str("="*47)}
  Product Name \t\tQTY \tPrice
 {str("=" * 47)}
@@ -406,25 +416,87 @@ Customer Name: {self.var_cname.get()}
      self.txt_bill_area.insert('1.0', bill_top_temp)
 
     def bill_bottom(self):
-      bill_bottom_temp=f'''
-{str("="*47)}
+    # Format the bill summary with a clear layout.
+     bill_bottom_temp = f'''
+{"="*47}
 Bill Amount\t\t\t\tRs.{self.bill_amt}
-Discount\t\t\t\tRS.{self.discount}
-Net Pay \t\t\t\tRS.{self.net_pay}
-{str("="*47)}\n
-      '''
-      self.txt_bill_area.insert(END, bill_bottom_temp)
+Discount\t\t\t\tRs.{self.discount}
+Net Pay\t\t\t\t\tRs.{self.net_pay}
+{"="*47}\n
+    '''
+    # Insert the formatted text into the bill area text widget
+     self.txt_bill_area.insert(END, bill_bottom_temp)
 
 
-    def Middle(self):
-     for row in self.cart_list:
-      #pid,name,price,qty,stock
-         name=row[1]
+    def bill_Middle(self):
+        con = sqlite3.connect(database=r'ims.db')
+        cur = con.cursor()
+        try:
+         
+         for row in self.cart_list:
+        # pid, name, price, qty, stock
+          
+          pid=row[0]
+
+         name = int(row[4])-int(row[3])
          qty=row[3]
+         if int(row[3])==int(row[4]):
+            status='Inactive'
+         if int(row[3])!=int(row[4]):
+            status='Active'
+        
          price=float(row[2])*int(row[3])
          price=str(price)
-         self.txt_bill_area.insert(END,"\n "+name+"\t\t\t"+qty+"\tRS."+price)
+         self.txt_bill_area.insert(END,"\n"+name+"\t\t\t"+row[3]+"price")
+         # =========update qty in product table========
+         cur.execute('Update product set qty=?,status=? where pid=?',(
+            qty,
+            status,
+            pid
+          ))
+         con.commit()
+         con.close()
+         self.show()
 
+        except IndexError:
+         messagebox.showerror("saved", "Invalid Quantity", parent=self.root)
+      
+     
+    def clear_cart(self):
+      self.var_pid.set('')
+      self.var_pname.set('')
+      self.var_price.set('')
+      self.var_qty.set('')
+      self.lbl_instock.config(text=f"In stock")
+      self.var_stock.set('')
+
+    def clear_all(self):
+      del self.cart_list[:]
+      self.var_cname.set('')
+      self.var_contact.set('')
+      self.txt_bill_area.delete('1.0',END)
+      self.cartTitle.config(text=f"Cart \t Total Products: [0]")
+      self.var_search.set('')
+      self.clear_cart()
+      self.show()
+      self.show_cart()
+
+    def update_date_time(self):
+    
+      time_ = time.strftime("%I:%M:%S ")  
+      date_ =time.strftime("%d-%m-%Y")
+      self.lbl_clock.config(text=f"Welcome to Inventory Management System\t\t Date: {date_}\t\t Time: {time_}")
+      self.lbl_clock.after(200, self.update_date_time)
+   
+    def print_bill(self):
+       if self.chk_print==1:
+         messagebox.showinfo('Print',"Please wait while printing",parent=self.root)
+         new_file=tempfile.mktemp('.txt')
+         open(new_file,'w').write(self.txt_bill_area.get('1.0',END))
+         os.startfile(new_file,'print')
+       else:
+         messagebox.showerror('Print',"Please generate bill,to print receipt",parent=self.root)
+         
 
 
 

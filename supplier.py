@@ -1,7 +1,7 @@
 import sqlite3
 from tkinter import *
 from PIL import Image, ImageTk  # pip install pillow
-from tkinter import ttk,messagebox,END
+from tkinter import ttk,messagebox
 class supplierClass:
     def __init__(self, root):
         self.root = root
@@ -22,19 +22,28 @@ class supplierClass:
         
         
         #===searchFrame=====
-        #===options===
-        lbl_search=Label(self.root,text="Invoice No.",bg="white",font=("goudy old style",15))
-        lbl_search.place(x=700,y=80)
-        
-        txt_search=Entry(self.root,textvariable=self.var_searchtxt,font=("goudy oldsd style",15),bg="lightyellow").place(x=800,y=80,width=160)
-        btn_search=Button(self.root,text="Search", command=self.search,font=("goudy oldsd style",15),bg="#4caf50",fg="white",cursor="hand2").place(x=980,y=79,width=100,height=28)
-        #===title====
-        title=Label(self.root,text="Supplier Details",font=("goudy old style",20,"bold"),bg="#0f4d7d",fg="white").place(x=50,y=10,width=1000,height=40)
-        #====content=====
-        #===row1====
-        lbl_supplier_invoice=Label(self.root,text="Invoice No.",font=("goudy old style",15),bg="white").place(x=50,y=80)
-        txt_supplier_invoice=Entry(self.root,textvariable=self.var_sup_invoice,font=("goudy old style",15),bg="lightyellow").place(x=180,y=80,width=180)
-        
+        lbl_search = Label(self.root, text="Invoice No.", bg="white", font=("goudy old style", 15))
+        lbl_search.place(x=700, y=80)
+
+      # Entry for searching
+        self.txt_search = Entry(self.root, textvariable=self.var_searchtxt, font=("goudy old style", 15), bg="lightyellow")
+        self.txt_search.place(x=800, y=80, width=160)
+
+     # Search Button
+        self.btn_search = Button(self.root, text="Search", command=self.search, font=("goudy old style", 15), bg="#4caf50", fg="white", cursor="hand2")
+        self.btn_search.place(x=980, y=79, width=100, height=28)
+
+     # Title
+        title = Label(self.root, text="Supplier Details", font=("goudy old style", 20, "bold"), bg="#0f4d7d", fg="white")
+        title.place(x=50, y=10, width=1000, height=40)
+
+    # Supplier Invoice
+        lbl_supplier_invoice = Label(self.root, text="Invoice No.", font=("goudy old style", 15), bg="white")
+        lbl_supplier_invoice.place(x=50, y=80)
+
+        txt_supplier_invoice = Entry(self.root, textvariable=self.var_sup_invoice, font=("goudy old style", 15), bg="lightyellow")
+        txt_supplier_invoice.place(x=180, y=80, width=180)
+
                                                                                                               
         #===row2===
         lbl_name=Label(self.root,text="Name",font=("goudy old style",15),bg="white").place(x=50,y=120)
@@ -74,11 +83,10 @@ class supplierClass:
         self.supplierTable = ttk.Treeview(supplier_frame, columns=("invoice", "name", "contact", "desc"),
                                    yscrollcommand=scrolly.set, xscrollcommand=scrollx.set)
 
-# Configure scrollbars
-        scrollx.pack(side=BOTTOM, fill=X)
-        scrolly.pack(side=RIGHT, fill=Y)
+# Configure scrollbars for supplier table
         scrollx.config(command=self.supplierTable.xview)
         scrolly.config(command=self.supplierTable.yview)
+
 
 # Define column headings
         self.supplierTable.heading("invoice", text="Invoice No.")
@@ -86,17 +94,20 @@ class supplierClass:
         self.supplierTable.heading("contact", text="Contact")
         self.supplierTable.heading("desc", text="Description")
 
+
 # Show only the headings
         self.supplierTable["show"] = "headings"
+
 
 # Set column widths
         self.supplierTable.column("invoice", width=90)
         self.supplierTable.column("name", width=100)
         self.supplierTable.column("contact", width=100)
-        self.supplierTable.column("desc", width=100)
+        self.supplierTable.column("desc", width=200)
+
 
 # Pack the Treeview
-        self.supplierTable.pack(fill=BOTH, expand=1)
+        self.supplierTable.pack(fill=BOTH,expand=1)
 
 # Bind the selection event to a method
         self.supplierTable.bind("<ButtonRelease-1>", self.get_data)
@@ -104,7 +115,7 @@ class supplierClass:
 
         self.show()
 #========================================================================================================
-
+  
     def add(self):
       con = sqlite3.connect(database=r'ims.db')
       cur = con.cursor()
@@ -168,9 +179,9 @@ class supplierClass:
      con = sqlite3.connect(database=r'ims.db')
      cur = con.cursor()
      try:
-         if self.var_sup_invoice.get() == "":
+        if self.var_sup_invoice.get() == "":
             messagebox.showerror("Error", "Invoice no. must be required", parent=self.root)
-         else:
+        else:
             cur.execute("SELECT * FROM supplier WHERE invoice=?", (self.var_sup_invoice.get(),))
             row = cur.fetchone()
             if row is None:
@@ -183,8 +194,7 @@ class supplierClass:
                         self.var_contact.get(),
                         self.txt_desc.get(1.0, END).strip(),  # Remove extra newline
                         self.var_sup_invoice.get(),
-                    )
-                )
+                    ))
                 con.commit()
                 messagebox.showinfo("Success", "Supplier updated successfully", parent=self.root)
                 self.show()  # Refresh the supplier list after updating
@@ -192,6 +202,7 @@ class supplierClass:
         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
      finally:
         con.close()  # Ensure connection is closed
+
 
     def delete(self):
      con = sqlite3.connect(database=r'ims.db')
@@ -209,12 +220,13 @@ class supplierClass:
                 if op:
                     cur.execute("DELETE FROM supplier WHERE invoice=?", (self.var_sup_invoice.get(),))
                     con.commit()
-                    messagebox.showinfo("Delete", "Supplier Deleted Successfully", parent=self.root)
-                    self.clear()  # Clear the input fields after deletion
+                    messagebox.showinfo("Delete", "Supplier deleted successfully", parent=self.root)
+                    self.clear()  # Clear input fields after deletion
      except Exception as ex:
         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
      finally:
         con.close()  # Ensure connection is closed
+
 
    
     def clear(self):
@@ -228,22 +240,25 @@ class supplierClass:
 
 
     def search(self):
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
-        try: 
-            if self.var_searchtxt.get() == "":
-                messagebox.showerror("Error", "Invoice no. should be required", parent=self.root) 
+     con = sqlite3.connect(database=r'ims.db')
+     cur = con.cursor()
+     try:
+        if self.var_searchtxt.get() == "":
+            messagebox.showerror("Error", "Invoice no. is required", parent=self.root) 
+        else:
+            cur.execute("SELECT * FROM supplier WHERE invoice=?", (self.var_searchtxt.get(),))
+            rows = cur.fetchall()
+            if rows:
+                self.supplierTable.delete(*self.supplierTable.get_children())  # Clear previous results
+                for row in rows:
+                    self.supplierTable.insert('', END, values=row)
             else:
-                cur.execute("SELECT * FROM supplier WHERE invoice=?", (self.var_searchtxt.get(),))
-                rows = cur.fetchall()
-                if rows:
-                    self.supplierTable.delete(*self.supplierTable.get_children())  # Fixed '*' syntax for unpacking the table children
-                    for row in rows:
-                        self.supplierTable.insert('', END, values=row)
-                else:
-                    messagebox.showerror("Error", "No record found!", parent=self.root)
-        except Exception as ex:
-            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+                messagebox.showinfo("No Results", "No records found!", parent=self.root)  # Info instead of error
+     except Exception as ex:
+        messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+     finally:
+        con.close()
+
 
                
 if __name__ == "__main__":
