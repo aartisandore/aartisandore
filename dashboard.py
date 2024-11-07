@@ -21,7 +21,7 @@ class IMS:
                       font=("times new roman", 40, "bold"), bg="#010c48", fg="white", anchor="w", padx=20)
         title.place(x=0, y=0, relwidth=1, height=70)
         # ===btn_logout===
-        btn_logout = Button(self.root, text="Logout", font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2")
+        btn_logout = Button(self.root, text="Logout", command=self.logout,font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2")
         btn_logout.place(x=1150, y=10, height=50, width=150)
         # ===clock=====
         self.lbl_clock = Label(self.root, text="Welcome to Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time: HH:MM:SS",
@@ -79,7 +79,6 @@ class IMS:
         lbl_footer.pack(side=BOTTOM, fill=X)
 
         self.update_content()
-
 #================================================================
     def employee(self):
         self.new_win=Toplevel(self.root)
@@ -115,13 +114,13 @@ class IMS:
 
             cur.execute("select * from category")
             category=cur.fetchall()
-            self.lbl_supplier.config(text=f"Total Category\n[ {str(len(category))} ]")
+            self.lbl_category.config(text=f"Total Category\n[ {str(len(category))} ]")
           
 
             cur.execute("select * from employee")
             employee=cur.fetchall()
             self.lbl_employee.config(text=f"Total Employee\n[ {str(len(employee))} ]")
-            self.lbl_sales.config(text=f"Total sales[{str(len(os.listdir('bill')))}]")
+            self.lbl_sales.config(text=f"Total sales\n[{str(len(os.listdir('bill')))}]")
   
           
             time_ = time.strftime("%I:%M:%S ")  
@@ -133,7 +132,9 @@ class IMS:
         except Exception as ex:
            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-
+    def logout(self):
+        self.root.destroy()
+        os.system("python login.py")
 
 if __name__=="__main__":   
  root = Tk()

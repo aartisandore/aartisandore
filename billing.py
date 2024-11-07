@@ -23,7 +23,7 @@ class BillClass:
                       font=("times new roman", 40, "bold"), bg="#010c48", fg="white", anchor="w", padx=20)
         title.place(x=0, y=0, relwidth=1, height=70)
         # ===btn_logout===
-        btn_logout = Button(self.root, text="Logout", font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2")
+        btn_logout = Button(self.root, text="Logout",command=self.logout,font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2")
         btn_logout.place(x=1150, y=10, height=50, width=150)
         # ===clock=====
         self.lbl_clock = Label(self.root, text="Welcome to Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time: HH:MM:SS",
@@ -497,8 +497,9 @@ Net Pay\t\t\t\t\tRs.{self.net_pay}
        else:
          messagebox.showerror('Print',"Please generate bill,to print receipt",parent=self.root)
          
-
-
+    def logout(self):
+       self.root.destroy()
+       os.system('python login.py')
 
 if __name__=="__main__":   
  root = Tk()
